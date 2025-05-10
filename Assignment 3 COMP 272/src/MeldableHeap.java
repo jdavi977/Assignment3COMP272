@@ -1,8 +1,8 @@
 import java.util.*;
 
 /**
- * 
- * @param <T>
+ * Meldable Heap for merging and deletion of nodes
+ * @param <T> is the type of elements stored in the heap
  */
 public class MeldableHeap<T extends Comparable<T>> {
     // Nested Node class

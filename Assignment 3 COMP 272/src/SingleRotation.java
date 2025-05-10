@@ -1,82 +1,91 @@
+/**
+ * This class demonstrates how to transform a binary tree into another using only AVL single rotations.
+ */
 public class SingleRotation {
 
-    /** Basic TreeNode definition */
+	/**
+	 * Binary tree node
+	 */
     static class TreeNode {
         int key;
         TreeNode left, right;
+        
+        /**
+         * Constructor to initialize the node with a key
+         * @param key value of the node
+         */
         TreeNode(int key) {
             this.key = key;
         }
     }
 
-    /** Right rotate around y:
-             y                x
-            / \     ==>      / \
-           x   C            A   y
-          / \                  / \
-         A   B                B   C
-    */
+    /**
+     * Performs a single right rotation around the node y
+     * @param y is the root of the subtree to rotate
+     * @return the new root of the subtree after the rotation
+     */
     static TreeNode rightRotate(TreeNode y) {
-        TreeNode x = y.left;
-        TreeNode B = x.right;
-        x.right = y;
-        y.left = B;
-        return x;
-    }
-
-    /** Left rotate around x:
-         x                   y
-        / \      ==>        / \
-       A   y               x   C
-          / \             / \
-         B   C           A   B
-    */
-    static TreeNode leftRotate(TreeNode x) {
-        TreeNode y = x.right;
-        TreeNode B = y.left;
-        y.left = x;
-        x.right = B;
-        return y;
+    	
+        TreeNode x = y.left; // x becomes new root
+        TreeNode B = x.right; // B will become the left child of y
+        x.right = y; // y becomes right child of x
+        y.left = B; // B becomes left child of y
+        return x; // return new root
     }
 
     /**
-     * Bubble the node with value 'key' up to the root of this subtree,
-     * using single rotations only.
+     * Performs a single left rotation around the node x
+     * @param x is the root of the subtree to rotate
+     * @return the new root of the subtree after the rotation
      */
-    static TreeNode bubbleUp(TreeNode root, int key) {
+    static TreeNode leftRotate(TreeNode x) {
+        TreeNode y = x.right; // y becomes new root
+        TreeNode B = y.left; // B will become right child of x
+        y.left = x; // x becomes left child of y
+        x.right = B; // B becomes right child of x
+        return y; // return new root
+    }
+
+    /**
+     * Moves the node with the key up to the root of the current subtree
+     * @param root the root of the subtree
+     * @param key the key to move up
+     * @return new root of the subtree with the key at the top
+     */
+    static TreeNode moveUp(TreeNode root, int key) {
         if (root.key == key) {
             return root;
         }
         if (key < root.key) {
-            // Bubble up within left subtree
-            root.left = bubbleUp(root.left, key);
-            // Now root.left.key == key, rotate right to move it up
-            return rightRotate(root);
+            root.left = moveUp(root.left, key); // Recursion left
+            return rightRotate(root); // Rotate right to move the key up
         } else {
-            // Bubble up within right subtree
-            root.right = bubbleUp(root.right, key);
-            // Now root.right.key == key, rotate left to move it up
-            return leftRotate(root);
+            root.right = moveUp(root.right, key); // Recursion right
+            return leftRotate(root); // Rotate left to move key up
         }
     }
 
     /**
-     * Transform tree t1 so that its structure matches tree t2,
-     * using only single rotations. Assumes both contain the same keys.
+     * Transforms tree t1 so that it matches t2
+     * @param t1 the tree to be transformed
+     * @param t2 the target tree that t1 will be transformed into
+     * @return transformed version of t1
      */
     static TreeNode transform(TreeNode t1, TreeNode t2) {
         if (t1 == null || t2 == null) {
             return t2;
         }
-        // Step 1: bubble t2.key up to root of t1
-        t1 = bubbleUp(t1, t2.key);
-        // Step 2: match left and right subtrees recursively
-        t1.left  = transform(t1.left,  t2.left);
-        t1.right = transform(t1.right, t2.right);
+        t1 = moveUp(t1, t2.key); // Moves t2.key to root of t1
+        t1.left  = transform(t1.left,  t2.left); // Recursively match left subtree
+        t1.right = transform(t1.right, t2.right); // Recursively match right subtree
+        
         return t1;
     }
 
-    /** Pre-order traversal (root, left, right) to display structure */
+    /**
+     * Performs a pre-order traversal of the tree and prints the node keys
+     * @param node the current node in traversal
+     */
     static void preorder(TreeNode node) {
         if (node == null) return;
         System.out.print(node.key + " ");
@@ -84,25 +93,20 @@ public class SingleRotation {
         preorder(node.right);
     }
 
+    /**
+     * Single rotation testing
+     * @param args unused command line arguments
+     */
     public static void main(String[] args) {
-        // Build original tree T1:
-        //     4
-        //    / \
-        //   2   5
-        //  / \
-        // 1   3
+    	
+    	// Making T1
         TreeNode T1 = new TreeNode(4);
         T1.left  = new TreeNode(2);
         T1.right = new TreeNode(5);
         T1.left.left  = new TreeNode(1);
         T1.left.right = new TreeNode(3);
 
-        // Build target tree T2:
-        //     3
-        //    / \
-        //   1   5
-        //    \  /
-        //     2 4
+        // Making T2, same keys but in different shape
         TreeNode T2 = new TreeNode(2);
         T2.left       = new TreeNode(1);
         T2.right      = new TreeNode(4);
@@ -113,7 +117,6 @@ public class SingleRotation {
         preorder(T1);
         System.out.println();
 
-        // Transform T1 into the shape of T2
         T1 = transform(T1, T2);
 
         System.out.print("Preorder of T2:     ");
